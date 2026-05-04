@@ -87,6 +87,21 @@ Follow these steps if you'd like to run Copilot CLI on your local machine with t
     curl -fsSL https://gh.io/copilot-install | bash
     ```
 
+> 💡 **Tip: Enable shell tab completion** — Once installed, you can set up tab completion so pressing **Tab** in your terminal auto-completes `copilot` commands and flags. Run the command for your shell:
+>
+> ```bash
+> # Bash
+> copilot completion bash >> ~/.bashrc && source ~/.bashrc
+>
+> # Zsh
+> copilot completion zsh >> ~/.zshrc && source ~/.zshrc
+>
+> # Fish
+> copilot completion fish > ~/.config/fish/completions/copilot.fish
+> ```
+>
+> After running this once, you can type `copilot ` and press **Tab** to see available subcommands, or start typing a flag like `--` and press **Tab** to auto-complete it. Entirely optional, but handy for beginners exploring the CLI.
+
 ---
 
 ## Authentication
@@ -97,7 +112,7 @@ Open a terminal window at the root of the `copilot-cli-for-beginners` repository
 copilot
 ```
 
-You'll be asked to trust the folder containing the repository (if you haven't already). You can trust it one time or across all future sessions.
+You'll be asked to trust the folder containing the repository (if you haven't already). Once you approve it, that approval is automatically saved — you won't need to re-approve the same folder in future sessions.
 
 <img src="images/copilot-trust.png" alt="Trusting files in a folder with the Copilot CLI" width="800"/>
 
