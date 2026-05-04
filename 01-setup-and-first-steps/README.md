@@ -435,7 +435,6 @@ That's it for getting started! As you become comfortable, you can explore additi
 
 | Command | What It Does |
 |---------|--------------|
-| `/chronicle` | Browse your session history — view past sessions, which files you worked on, and what changed |
 | `/clear` | Abandons the current session (no history saved) and starts a fresh conversation |
 | `/compact` | Summarize conversation to reduce context usage |
 | `/context` | Show context window token usage and visualization |
