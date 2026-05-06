@@ -51,3 +51,8 @@ def test_remove_book_invalid():
     collection = BookCollection()
     result = collection.remove_book("Nonexistent Book")
     assert result is False
+
+def test_list_books_returns_empty_for_new_collection():
+    """Deterministic baseline: a fresh collection always starts with zero books."""
+    collection = BookCollection()
+    assert collection.list_books() == []
