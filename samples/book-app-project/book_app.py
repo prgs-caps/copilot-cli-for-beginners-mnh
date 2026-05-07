@@ -1,6 +1,6 @@
 import sys
-from books import BookCollection
 
+from books import BookCollection
 
 # Global collection instance
 collection = BookCollection()

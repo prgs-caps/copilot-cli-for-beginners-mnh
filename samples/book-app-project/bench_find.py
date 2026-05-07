@@ -5,9 +5,10 @@ Run from the samples/book-app-project directory:
 
 Uses a temporary file so it never touches data.json.
 """
-import timeit
-import tempfile
 import os
+import tempfile
+import timeit
+
 import books
 from books import BookCollection
 
