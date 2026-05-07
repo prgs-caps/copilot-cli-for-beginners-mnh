@@ -71,3 +71,18 @@ def test_add_book_invalid_year_raises():
     collection = BookCollection()
     with pytest.raises(ValueError, match="year"):
         collection.add_book("Some Title", "Some Author", -1)
+
+def test_find_book_case_insensitive_by_default(monkeypatch):
+    """Default (BOOKS_CASE_SENSITIVE unset): title matching is case-insensitive."""
+    monkeypatch.delenv("BOOKS_CASE_SENSITIVE", raising=False)
+    collection = BookCollection()
+    collection.add_book("Dune", "Frank Herbert", 1965)
+    assert collection.find_book_by_title("dune") is not None
+
+def test_find_book_case_sensitive_when_flag_on(monkeypatch):
+    """ON (BOOKS_CASE_SENSITIVE=1): wrong case returns None, exact case succeeds."""
+    monkeypatch.setenv("BOOKS_CASE_SENSITIVE", "1")
+    collection = BookCollection()
+    collection.add_book("Dune", "Frank Herbert", 1965)
+    assert collection.find_book_by_title("dune") is None
+    assert collection.find_book_by_title("Dune") is not None

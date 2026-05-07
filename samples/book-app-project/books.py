@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import time
 from dataclasses import dataclass, asdict
 from typing import List, Optional
@@ -88,7 +89,13 @@ class BookCollection:
         return self.books
 
     def _titles_match(self, a: str, b: str) -> bool:
-        """Case-insensitive equality check for two title strings."""
+        """Compare two title strings. Case-insensitive by default.
+
+        Set the environment variable BOOKS_CASE_SENSITIVE=1 to enable
+        strict case-sensitive matching.
+        """
+        if os.environ.get("BOOKS_CASE_SENSITIVE", "").strip() == "1":
+            return a == b
         return a.lower() == b.lower()
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
