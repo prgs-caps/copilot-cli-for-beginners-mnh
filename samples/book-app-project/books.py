@@ -44,9 +44,12 @@ class BookCollection:
     def list_books(self) -> List[Book]:
         return self.books
 
+    def _titles_match(self, a: str, b: str) -> bool:
+        return a.lower() == b.lower()
+
     def find_book_by_title(self, title: str) -> Optional[Book]:
         for book in self.books:
-            if book.title.lower() == title.lower():
+            if self._titles_match(book.title, title):
                 return book
         return None
 
