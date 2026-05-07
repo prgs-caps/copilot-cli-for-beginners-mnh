@@ -1,9 +1,40 @@
 %% architecture.mmd
-%% Status: Placeholder — update during Ex 1 (Repo Orientation).
-%% Replace this with a real component diagram after Ex 1.
+%% Updated: Walk Ex 1 — nodes mapped to real repo paths, data flows added.
 
 graph TD
-    A[Entry Point] --> B[Core Module]
-    B --> C[Chosen Low-Risk Module]
-    B --> D[Other Modules]
-    C --> E[Tests]
+    subgraph "CLI Layer"
+        CLI["samples/book-app-project/book_app.py\n(Interactive CLI — stdin/stdout)"]
+    end
+
+    subgraph "Core Module"
+        BC["samples/book-app-project/books.py\nBookCollection class\nadd_book · list_books · find_book\nmark_as_read · remove_book"]
+    end
+
+    subgraph "Persistence"
+        DATA["samples/book-app-project/data.json\n(JSON list of Book dataclass records)"]
+    end
+
+    subgraph "Test Suite"
+        TESTS["samples/book-app-project/tests/test_books.py\npytest · 15 tests\nautouse fixture — tmp_path + monkeypatch"]
+    end
+
+    subgraph "Benchmark"
+        BENCH["samples/book-app-project/bench_find.py\ntimeit micro-benchmark for find_book"]
+    end
+
+    subgraph "Config"
+        TOML["samples/book-app-project/pyproject.toml\ndependencies · ruff · pytest config"]
+    end
+
+    %% Data Flow 1: User interaction path
+    CLI -->|"calls BookCollection methods"| BC
+    BC -->|"load_books / save_books (JSON r/w)"| DATA
+
+    %% Data Flow 2: Test execution path
+    TESTS -->|"imports and exercises BookCollection\nmonkeypatches DATA_FILE to tmp_path"| BC
+
+    %% Data Flow 3: Benchmark path
+    BENCH -->|"timeit loop calls find_book"| BC
+
+    %% Config wiring
+    TOML -.->|"pytest settings · ruff rules"| TESTS

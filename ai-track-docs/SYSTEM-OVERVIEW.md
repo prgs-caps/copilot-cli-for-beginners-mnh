@@ -29,6 +29,15 @@ A structured GitHub Copilot learning course (`copilot-cli-for-beginners`) contai
 - Run from `samples/book-app-project/`: `pytest`
 - Tests are hermetic — `tmp_path` + `monkeypatch` fixtures isolate all file I/O so no real `data.json` is touched during tests
 
+## Architecture
+
+See [`ai-track-docs/architecture.mmd`](architecture.mmd) for the full component diagram (Mermaid).
+
+**Key data flows:**
+1. **User → CLI → Core → Persistence:** `book_app.py` calls `BookCollection` methods which read/write `data.json`
+2. **Test execution:** `test_books.py` imports `BookCollection` directly; `monkeypatch` redirects `DATA_FILE` to `tmp_path` so the real `data.json` is never touched
+3. **Benchmark:** `bench_find.py` calls `find_book` in a `timeit` loop against a seeded in-memory collection
+
 ## Chosen Low-Risk Module
 
 **`samples/book-app-project/books.py`**
