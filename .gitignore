@@ -28,6 +28,21 @@ output.json
 .env.test.local
 .env.production.local
 
+# Secret and credential files
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+secrets.json
+credentials.json
+serviceaccount.json
+
+# book-app runtime data file (contains user data, must not be committed)
+samples/book-app-project/data.json
+
 # IDE and Editor directories
 .vscode/*
 !.vscode/extensions.json
