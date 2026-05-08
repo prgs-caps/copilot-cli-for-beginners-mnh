@@ -1,9 +1,10 @@
 import json
 import logging
-import os
 import time
 from dataclasses import asdict, dataclass
 from typing import List, Optional
+
+from utils import titles_match
 
 DATA_FILE = "data.json"
 
@@ -67,12 +68,7 @@ class BookCollection:
         Raises:
             ValueError: If title or author is blank, or year is not a positive integer.
         """
-        if not title or not title.strip():
-            raise ValueError("title must not be blank")
-        if not author or not author.strip():
-            raise ValueError("author must not be blank")
-        if not isinstance(year, int) or year <= 0:
-            raise ValueError("year must be a positive integer")
+        self._validate_book_fields(title, author, year)
         t0 = time.monotonic()
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
@@ -89,24 +85,23 @@ class BookCollection:
         )
         return book
 
+    def _validate_book_fields(self, title: str, author: str, year: int) -> None:
+        """Raise ValueError if any book field is invalid."""
+        if not title or not title.strip():
+            raise ValueError("title must not be blank")
+        if not author or not author.strip():
+            raise ValueError("author must not be blank")
+        if not isinstance(year, int) or year <= 0:
+            raise ValueError("year must be a positive integer")
+
     def list_books(self) -> List[Book]:
         """Return all books in insertion order."""
         return self.books
 
-    def _titles_match(self, a: str, b: str) -> bool:
-        """Compare two title strings. Case-insensitive by default.
-
-        Set the environment variable BOOKS_CASE_SENSITIVE=1 to enable
-        strict case-sensitive matching.
-        """
-        if os.environ.get("BOOKS_CASE_SENSITIVE", "").strip() == "1":
-            return a == b
-        return a.lower() == b.lower()
-
     def find_book_by_title(self, title: str) -> Optional[Book]:
-        """Return the first Book whose title matches (case-insensitive), or None."""
+        """Return the first Book whose title matches, or None."""
         for book in self.books:
-            if self._titles_match(book.title, title):
+            if titles_match(book.title, title):
                 return book
         return None
 
