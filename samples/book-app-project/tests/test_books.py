@@ -146,3 +146,46 @@ def test_titles_match_case_sensitive_flag(monkeypatch):
     monkeypatch.setenv("BOOKS_CASE_SENSITIVE", "1")
     assert titles_match("Dune", "dune") is False
     assert titles_match("Dune", "Dune") is True
+
+
+# --- Contract tests (Walk Ex5) ---
+# Boundary: add_book() and list_books() return shape.
+# These tests lock the public API surface so any field rename or type change
+# is caught immediately. Update the assertions here when the schema changes.
+
+def test_add_book_return_shape():
+    """Contract: add_book always returns a Book with the expected fields and types."""
+    from dataclasses import asdict
+    collection = BookCollection()
+    book = collection.add_book("Brave New World", "Aldous Huxley", 1932)
+    d = asdict(book)
+    assert set(d.keys()) == {"title", "author", "year", "read"}, (
+        "Book schema changed — update contract tests and ai-track-docs/contract-tests.md"
+    )
+    assert isinstance(d["title"], str)
+    assert isinstance(d["author"], str)
+    assert isinstance(d["year"], int)
+    assert isinstance(d["read"], bool)
+    assert d["read"] is False  # new books are always unread
+
+
+def test_add_book_return_values_match_inputs():
+    """Contract: add_book echoes inputs exactly in the returned Book."""
+    collection = BookCollection()
+    book = collection.add_book("Fahrenheit 451", "Ray Bradbury", 1953)
+    assert book.title == "Fahrenheit 451"
+    assert book.author == "Ray Bradbury"
+    assert book.year == 1953
+
+
+def test_list_books_serialization_shape():
+    """Contract: list_books entries serialize to dicts with the expected keys."""
+    from dataclasses import asdict
+    collection = BookCollection()
+    collection.add_book("The Road", "Cormac McCarthy", 2006)
+    books_list = collection.list_books()
+    assert len(books_list) == 1
+    d = asdict(books_list[0])
+    assert set(d.keys()) == {"title", "author", "year", "read"}, (
+        "Serialization schema changed — update contract tests and ai-track-docs/contract-tests.md"
+    )
