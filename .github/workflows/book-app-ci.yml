@@ -1,0 +1,44 @@
+name: book-app CI (soft gate)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: pytest + coverage summary
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: samples/book-app-project
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run tests with coverage
+        id: run-tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pytest -v --cov=. --cov-report=term-missing --cov-report=json 2>&1 | tee /tmp/pytest-out.txt
+
+      - name: Post coverage summary
+        if: always()
+        run: |
+          echo "## Test & Coverage Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f coverage.json ]; then
+            TOTAL=$(python -c "import json; d=json.load(open('coverage.json')); print(d['totals']['percent_covered_display'])")
+            echo "**Coverage: ${TOTAL}%**" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/pytest-out.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
