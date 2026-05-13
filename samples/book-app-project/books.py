@@ -46,19 +46,29 @@ class BookCollection:
         except FileNotFoundError:
             self.books = []
         except json.JSONDecodeError:
-            print("Warning: data.json is corrupted. Starting with empty collection.")
+            logger.warning(
+                "load_books_corrupt",
+                extra={"op": "load_books", "status": "corrupt", "file": DATA_FILE},
+            )
             self.books = []
 
     def save_books(self) -> None:
         """Save the current book collection to JSON (with retry on transient OSError)."""
         self._save_with_retry()
 
-    def _save_with_retry(self, max_attempts: int = 3, initial_delay: float = 0.05) -> None:
+    def _save_with_retry(
+        self,
+        max_attempts: int = 3,
+        initial_delay: float = 0.05,
+        backoff: float = 2.0,
+    ) -> None:
         """Write the book list to DATA_FILE, retrying on transient OSError.
 
         Args:
             max_attempts:  Total number of write attempts before re-raising.
-            initial_delay: Seconds before the first retry; doubles each attempt.
+            initial_delay: Seconds before the first retry.
+            backoff:       Multiplier applied to the delay after each failed
+                           attempt (default 2.0 = exponential; 1.0 = linear).
 
         Raises:
             OSError: If all attempts are exhausted.
@@ -81,7 +91,7 @@ class BookCollection:
                     },
                 )
                 time.sleep(delay)
-                delay *= 2
+                delay *= backoff
 
     def add_book(self, title: str, author: str, year: int) -> Book:
         """Create a new Book, append it to the collection, and persist.
