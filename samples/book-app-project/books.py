@@ -49,10 +49,39 @@ class BookCollection:
             print("Warning: data.json is corrupted. Starting with empty collection.")
             self.books = []
 
-    def save_books(self):
-        """Save the current book collection to JSON."""
-        with open(DATA_FILE, "w") as f:
-            json.dump([asdict(b) for b in self.books], f, indent=2)
+    def save_books(self) -> None:
+        """Save the current book collection to JSON (with retry on transient OSError)."""
+        self._save_with_retry()
+
+    def _save_with_retry(self, max_attempts: int = 3, initial_delay: float = 0.05) -> None:
+        """Write the book list to DATA_FILE, retrying on transient OSError.
+
+        Args:
+            max_attempts:  Total number of write attempts before re-raising.
+            initial_delay: Seconds before the first retry; doubles each attempt.
+
+        Raises:
+            OSError: If all attempts are exhausted.
+        """
+        delay = initial_delay
+        for attempt in range(1, max_attempts + 1):
+            try:
+                with open(DATA_FILE, "w") as f:
+                    json.dump([asdict(b) for b in self.books], f, indent=2)
+                return
+            except OSError:
+                if attempt == max_attempts:
+                    raise
+                logger.warning(
+                    "save_retry",
+                    extra={
+                        "attempt": attempt,
+                        "max_attempts": max_attempts,
+                        "delay_s": round(delay, 4),
+                    },
+                )
+                time.sleep(delay)
+                delay *= 2
 
     def add_book(self, title: str, author: str, year: int) -> Book:
         """Create a new Book, append it to the collection, and persist.
