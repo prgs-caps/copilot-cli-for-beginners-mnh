@@ -124,11 +124,32 @@ class BookCollection:
         Uses a single-pass enumerate + pop(i) to avoid the double linear scan
         that find_book_by_title + list.remove would otherwise perform.
         """
+        t0 = time.monotonic()
         for i, book in enumerate(self.books):
             if titles_match(book.title, title):
                 self.books.pop(i)
                 self.save_books()
+                elapsed_ms = (time.monotonic() - t0) * 1000
+                logger.debug(
+                    "book_removed",
+                    extra={
+                        "op": "remove_book",
+                        "status": "ok",
+                        "title": title,
+                        "elapsed_ms": round(elapsed_ms, 3),
+                    },
+                )
                 return True
+        elapsed_ms = (time.monotonic() - t0) * 1000
+        logger.debug(
+            "book_remove_miss",
+            extra={
+                "op": "remove_book",
+                "status": "not_found",
+                "title": title,
+                "elapsed_ms": round(elapsed_ms, 3),
+            },
+        )
         return False
 
     def find_by_author(self, author: str) -> List[Book]:
