@@ -280,3 +280,74 @@ def test_load_books_corrupt_uses_logger_not_print(tmp_path, monkeypatch, caplog)
     assert any("load_books_corrupt" in r.message for r in caplog.records), (
         "Expected a 'load_books_corrupt' warning log entry"
     )
+
+
+# --- Run Ex 5 — Contract Sweep ---
+# Two additional boundaries: persistence round-trip and find_book_by_title return shape.
+# If the Book schema or JSON format changes, update these tests AND
+# ai-track-docs/contract-tests.md (the "How to update" section there lists the steps).
+
+
+def test_persistence_round_trip_contract(tmp_path, monkeypatch):
+    """Contract: save_books + load_books preserves all Book fields with correct types.
+
+    This locks the data.json serialization format. If save/load changes how a field
+    is stored (e.g. 'year' becomes a string), this test catches it immediately.
+    Update the assertions here and the table in ai-track-docs/contract-tests.md.
+    """
+    from dataclasses import asdict
+
+    monkeypatch.setattr(books, "DATA_FILE", str(tmp_path / "data.json"))
+    c1 = BookCollection()
+    c1.add_book("Solaris", "Stanislaw Lem", 1961)
+    c1.mark_as_read("Solaris")
+    c1.save_books()
+
+    c2 = BookCollection()
+    loaded = c2.list_books()
+    assert len(loaded) == 1, "Round-trip must preserve book count"
+
+    d = asdict(loaded[0])
+    assert set(d.keys()) == {"title", "author", "year", "read"}, (
+        "Persistence schema changed — update contract tests and ai-track-docs/contract-tests.md"
+    )
+    assert d["title"] == "Solaris"
+    assert d["author"] == "Stanislaw Lem"
+    assert isinstance(d["year"], int) and d["year"] == 1961, (
+        "'year' must survive round-trip as int — check JSON serialization"
+    )
+    assert isinstance(d["read"], bool) and d["read"] is True, (
+        "'read' must survive round-trip as bool — check JSON serialization"
+    )
+
+
+def test_find_book_returns_none_for_missing_contract():
+    """Contract: find_book_by_title returns exactly None (not falsy) when absent."""
+    collection = BookCollection()
+    result = collection.find_book_by_title("No Such Book")
+    assert result is None, (
+        "find_book_by_title must return None (not [] or False) when book is absent"
+    )
+
+
+def test_find_book_return_shape_contract():
+    """Contract: find_book_by_title returns a Book with the expected fields when found.
+
+    If Book gains, loses, or renames a field, this test and the table in
+    ai-track-docs/contract-tests.md must be updated together.
+    """
+    from dataclasses import asdict
+
+    collection = BookCollection()
+    collection.add_book("Hyperion", "Dan Simmons", 1989)
+    result = collection.find_book_by_title("Hyperion")
+    assert result is not None, "find_book_by_title must return a Book when the title exists"
+
+    d = asdict(result)
+    assert set(d.keys()) == {"title", "author", "year", "read"}, (
+        "Book schema changed — update contract tests and ai-track-docs/contract-tests.md"
+    )
+    assert isinstance(d["title"], str)
+    assert isinstance(d["author"], str)
+    assert isinstance(d["year"], int)
+    assert isinstance(d["read"], bool)
