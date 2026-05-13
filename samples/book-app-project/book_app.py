@@ -1,6 +1,10 @@
+import logging
 import sys
+import time
 
 from books import BookCollection
+
+logger = logging.getLogger(__name__)
 
 # Global collection instance
 collection = BookCollection()
@@ -22,7 +26,13 @@ def show_books(books):
 
 
 def handle_list():
+    t0 = time.monotonic()
     books = collection.list_books()
+    elapsed_ms = (time.monotonic() - t0) * 1000
+    logger.debug(
+        "cmd_list",
+        extra={"op": "handle_list", "status": "ok", "count": len(books), "elapsed_ms": round(elapsed_ms, 3)},
+    )
     show_books(books)
 
 
@@ -34,10 +44,20 @@ def handle_add():
     year_str = input("Year: ").strip()
 
     try:
+        t0 = time.monotonic()
         year = int(year_str) if year_str else 0
         collection.add_book(title, author, year)
+        elapsed_ms = (time.monotonic() - t0) * 1000
+        logger.info(
+            "cmd_add",
+            extra={"op": "handle_add", "status": "ok", "title": title, "elapsed_ms": round(elapsed_ms, 3)},
+        )
         print("\nBook added successfully.\n")
     except ValueError as e:
+        logger.warning(
+            "cmd_add_failed",
+            extra={"op": "handle_add", "status": "error", "error": str(e)},
+        )
         print(f"\nError: {e}\n")
 
 
@@ -45,8 +65,11 @@ def handle_remove():
     print("\nRemove a Book\n")
 
     title = input("Enter the title of the book to remove: ").strip()
-    collection.remove_book(title)
-
+    removed = collection.remove_book(title)
+    logger.info(
+        "cmd_remove",
+        extra={"op": "handle_remove", "status": "ok" if removed else "not_found", "title": title},
+    )
     print("\nBook removed if it existed.\n")
 
 
@@ -90,6 +113,7 @@ def main():
     elif command == "help":
         show_help()
     else:
+        logger.warning("cmd_unknown", extra={"op": "main", "status": "unknown_command", "command": command})
         print("Unknown command.\n")
         show_help()
 

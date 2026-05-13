@@ -1,4 +1,7 @@
+import logging
 import os
+
+logger = logging.getLogger(__name__)
 
 
 def titles_match(a: str, b: str) -> bool:
@@ -32,6 +35,10 @@ def get_book_details() -> tuple[str, str, int]:
     try:
         year = int(year_input)
     except ValueError:
+        logger.warning(
+            "invalid_year_input",
+            extra={"op": "get_book_details", "status": "invalid_year", "input": year_input},
+        )
         print("Invalid year. Defaulting to 0.")
         year = 0
 
