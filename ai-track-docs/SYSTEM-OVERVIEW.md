@@ -29,6 +29,10 @@ A structured GitHub Copilot learning course (`copilot-cli-for-beginners`) contai
 - Run from `samples/book-app-project/`: `pytest`
 - Tests are hermetic — `tmp_path` + `monkeypatch` fixtures isolate all file I/O so no real `data.json` is touched during tests
 
+## Subsystem Index
+
+See [`ai-track-docs/subsystem-book-app.md`](subsystem-book-app.md) for the full file map of `samples/book-app-project/` — real paths, risk notes, and links to all related docs.
+
 ## Architecture
 
 See [`ai-track-docs/architecture.mmd`](architecture.mmd) for the full component diagram (Mermaid).
