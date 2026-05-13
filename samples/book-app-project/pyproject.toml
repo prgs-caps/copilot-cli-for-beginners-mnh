@@ -16,8 +16,9 @@ addopts = "--cov=. --cov-report=term-missing"
 [tool.bandit]
 # B101 (assert_used): all assert statements in this project live in pytest test files;
 # assert is the standard pytest assertion pattern and carries no production risk.
+# exclude_dirs is intentionally omitted so bandit scans test files for all other
+# security issues (injection, unsafe calls, etc.) — only asserts are suppressed.
 skips = ["B101"]
-exclude_dirs = ["tests"]
 
 [tool.ruff]
 target-version = "py310"
