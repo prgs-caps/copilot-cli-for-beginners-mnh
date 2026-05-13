@@ -2,10 +2,10 @@
 name = "book-app"
 version = "0.1.0"
 requires-python = ">=3.10"
-dependencies = ["pytest>=9.0,<10"]
+dependencies = ["pytest>=9.0.3,<10"]
 
 [project.optional-dependencies]
-dev = ["ruff>=0.4,<1", "pytest-cov>=5.0,<8", "bandit>=1.7,<2"]
+dev = ["ruff>=0.15,<1", "pytest-cov>=7.1,<8", "bandit>=1.9,<2"]
 
 [tool.setuptools]
 py-modules = ["book_app", "books", "utils"]
