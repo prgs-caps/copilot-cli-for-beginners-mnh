@@ -38,11 +38,9 @@ class BookCollection:
         self.load_books()
 
     def load_books(self):
-        """Load books from the JSON file if it exists."""
+        """Load books from the JSON file, retrying on transient OSError."""
         try:
-            with open(DATA_FILE) as f:
-                data = json.load(f)
-                self.books = [Book(**b) for b in data]
+            self._load_with_retry()
         except FileNotFoundError:
             self.books = []
         except json.JSONDecodeError:
@@ -52,9 +50,64 @@ class BookCollection:
             )
             self.books = []
 
+    def _load_with_retry(
+        self,
+        max_attempts: int | None = None,
+        initial_delay: float | None = None,
+        backoff: float = 2.0,
+    ) -> None:
+        """Read DATA_FILE and populate self.books, retrying on transient OSError.
+
+        Args:
+            max_attempts:  Total read attempts (default from BOOK_APP_MAX_RETRIES, else 3).
+            initial_delay: Seconds before first retry
+                (default from BOOK_APP_RETRY_DELAY, else 0.05).
+            backoff:       Delay multiplier after each failure (2.0 = exponential).
+
+        Raises:
+            FileNotFoundError: If the file does not exist (propagated without retry).
+            OSError:           If all retry attempts are exhausted.
+            json.JSONDecodeError: If the file is present but malformed (propagated).
+        """
+        if max_attempts is None:
+            max_attempts = int(os.environ.get("BOOK_APP_MAX_RETRIES", "3"))
+        if initial_delay is None:
+            initial_delay = float(os.environ.get("BOOK_APP_RETRY_DELAY", "0.05"))
+        delay = initial_delay
+        for attempt in range(1, max_attempts + 1):
+            try:
+                with open(DATA_FILE) as f:
+                    data = json.load(f)
+                self.books = [Book(**b) for b in data]
+                return
+            except FileNotFoundError:
+                raise  # not transient — propagate immediately
+            except json.JSONDecodeError:
+                raise  # not transient — propagate immediately
+            except OSError:
+                if attempt == max_attempts:
+                    raise
+                logger.warning(
+                    "load_retry",
+                    extra={
+                        "attempt": attempt,
+                        "max_attempts": max_attempts,
+                        "delay_s": round(delay, 4),
+                    },
+                )
+                time.sleep(delay)
+                delay *= backoff
+
     def save_books(self) -> None:
-        """Save the current book collection to JSON (with retry on transient OSError)."""
-        self._save_with_retry()
+        """Save the current book collection to JSON (with retry on transient OSError).
+
+        Retry parameters are tunable via environment variables:
+          BOOK_APP_MAX_RETRIES   — integer, total attempts (default 3)
+          BOOK_APP_RETRY_DELAY   — float, initial delay in seconds (default 0.05)
+        """
+        max_attempts = int(os.environ.get("BOOK_APP_MAX_RETRIES", "3"))
+        initial_delay = float(os.environ.get("BOOK_APP_RETRY_DELAY", "0.05"))
+        self._save_with_retry(max_attempts=max_attempts, initial_delay=initial_delay)
 
     def _save_with_retry(
         self,
