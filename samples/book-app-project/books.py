@@ -74,10 +74,11 @@ class BookCollection:
             OSError: If all attempts are exhausted.
         """
         delay = initial_delay
+        data = [asdict(b) for b in self.books]
         for attempt in range(1, max_attempts + 1):
             try:
                 with open(DATA_FILE, "w") as f:
-                    json.dump([asdict(b) for b in self.books], f, indent=2)
+                    json.dump(data, f)
                 return
             except OSError:
                 if attempt == max_attempts:
@@ -135,7 +136,7 @@ class BookCollection:
 
     def list_books(self) -> List[Book]:
         """Return all books in insertion order."""
-        return self.books
+        return list(self.books)
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
         """Return the first Book whose title matches, or None."""
