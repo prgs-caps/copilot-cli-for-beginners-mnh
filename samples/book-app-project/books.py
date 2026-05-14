@@ -3,7 +3,6 @@ import logging
 import os
 import time
 from dataclasses import asdict, dataclass
-from typing import List, Optional
 
 from utils import titles_match
 
@@ -35,13 +34,13 @@ class BookCollection:
     automatically saved after every mutating operation.
     """
     def __init__(self):
-        self.books: List[Book] = []
+        self.books: list[Book] = []
         self.load_books()
 
     def load_books(self):
         """Load books from the JSON file if it exists."""
         try:
-            with open(DATA_FILE, "r") as f:
+            with open(DATA_FILE) as f:
                 data = json.load(f)
                 self.books = [Book(**b) for b in data]
         except FileNotFoundError:
@@ -110,9 +109,11 @@ class BookCollection:
             ValueError: If title or author is blank, or year is not a positive integer.
         """
         self._validate_book_fields(title, author, year)
-        if os.environ.get("BOOK_APP_STRICT_DUPLICATES") == "1":
-            if self.find_book_by_title(title) is not None:
-                raise ValueError(f"duplicate title: {title!r}")
+        if (
+            os.environ.get("BOOK_APP_STRICT_DUPLICATES") == "1"
+            and self.find_book_by_title(title) is not None
+        ):
+            raise ValueError(f"duplicate title: {title!r}")
         t0 = time.monotonic()
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
@@ -138,11 +139,11 @@ class BookCollection:
         if not isinstance(year, int) or year <= 0:
             raise ValueError("year must be a positive integer")
 
-    def list_books(self) -> List[Book]:
+    def list_books(self) -> list[Book]:
         """Return all books in insertion order."""
         return list(self.books)
 
-    def find_book_by_title(self, title: str) -> Optional[Book]:
+    def find_book_by_title(self, title: str) -> Book | None:
         """Return the first Book whose title matches, or None."""
         for book in self.books:
             if titles_match(book.title, title):
@@ -196,6 +197,6 @@ class BookCollection:
         )
         return False
 
-    def find_by_author(self, author: str) -> List[Book]:
+    def find_by_author(self, author: str) -> list[Book]:
         """Find all books by a given author."""
         return [b for b in self.books if b.author.lower() == author.lower()]

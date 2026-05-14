@@ -25,4 +25,10 @@ target-version = "py310"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
+# E/F/W/I: core errors, unused imports, whitespace, import order (baseline from Walk Ex 14)
+# UP: modernize Python syntax (e.g. List -> list, Optional -> X | None) — Run Ex 14
+# B: flake8-bugbear high-signal bug-prone patterns — Run Ex 14
+# C4: flake8-comprehensions (unnecessary list/dict construction) — Run Ex 14
+# SIM: flake8-simplify (unnecessary nesting, redundant conditions) — Run Ex 14
+# RUF: Ruff-native rules — Run Ex 14
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
