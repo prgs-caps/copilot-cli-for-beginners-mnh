@@ -178,6 +178,49 @@ def test_add_book_return_values_match_inputs():
     assert book.year == 1953
 
 
+# --- Walk Ex 15 — retry/backoff resilience tests ---
+
+
+def test_save_with_retry_succeeds_after_transient_oserror(tmp_path, monkeypatch):
+    """_save_with_retry retries and succeeds when the first write raises OSError."""
+    monkeypatch.setattr(books, "DATA_FILE", str(tmp_path / "data.json"))
+    collection = BookCollection()
+
+    real_open = open
+    write_calls = [0]
+
+    def patched_open(*args, **kwargs):
+        mode = args[1] if len(args) > 1 else kwargs.get("mode", "r")
+        if mode == "w":
+            write_calls[0] += 1
+            if write_calls[0] == 1:
+                raise OSError("simulated transient disk error")
+        return real_open(*args, **kwargs)
+
+    monkeypatch.setattr("builtins.open", patched_open)
+    collection._save_with_retry(max_attempts=2, initial_delay=0)
+
+    assert write_calls[0] == 2  # failed once, then succeeded
+
+
+def test_save_with_retry_raises_after_max_attempts(tmp_path, monkeypatch):
+    """_save_with_retry raises OSError after exhausting all retry attempts."""
+    monkeypatch.setattr(books, "DATA_FILE", str(tmp_path / "data.json"))
+    collection = BookCollection()
+
+    real_open = open
+
+    def always_fail_on_write(*args, **kwargs):
+        mode = args[1] if len(args) > 1 else kwargs.get("mode", "r")
+        if mode == "w":
+            raise OSError("permanent write failure")
+        return real_open(*args, **kwargs)
+
+    monkeypatch.setattr("builtins.open", always_fail_on_write)
+    with pytest.raises(OSError, match="permanent write failure"):
+        collection._save_with_retry(max_attempts=2, initial_delay=0)
+
+
 def test_list_books_serialization_shape():
     """Contract: list_books entries serialize to dicts with the expected keys."""
     from dataclasses import asdict
