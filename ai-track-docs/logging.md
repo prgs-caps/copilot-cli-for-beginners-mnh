@@ -19,6 +19,17 @@ Every successful `add_book` call emits a `DEBUG` record with these fields:
 | `title` | The title that was added |
 | `elapsed_ms` | Time taken for append + save, in milliseconds |
 
+### Instrumented path: `remove_book` (Walk Ex 9)
+
+Every `remove_book` call emits a `DEBUG` record. Two outcomes are covered:
+
+| Field | Found case | Not-found case |
+|-------|------------|----------------|
+| `op` | `"remove_book"` | `"remove_book"` |
+| `status` | `"ok"` | `"not_found"` |
+| `title` | The title requested | The title requested |
+| `elapsed_ms` | Time taken for scan + pop + save, in ms | Time taken for full scan, in ms |
+
 ## How to view logs locally
 
 Logging is off by default. To enable it, configure the root logger before calling any `BookCollection` methods.
@@ -41,16 +52,20 @@ import books
 from books import BookCollection
 col = BookCollection()
 col.add_book('Dune', 'Frank Herbert', 1965)
+col.remove_book('Dune')
+col.remove_book('Missing Title')
 "
 ```
 
 Expected output:
 ```
-DEBUG books book_added | op=add_book status=ok elapsed_ms=<n>
+DEBUG books book_added       | op=add_book    status=ok        elapsed_ms=<n>
+DEBUG books book_removed     | op=remove_book status=ok        elapsed_ms=<n>
+DEBUG books book_remove_miss | op=remove_book status=not_found elapsed_ms=<n>
 ```
 
 ## Notes
 
 - Log output is suppressed in tests — `pytest` does not configure the root logger.
-- Only `add_book` is instrumented in this baseline; extend to `mark_as_read` and `remove_book` following the same pattern.
+- `add_book` and `remove_book` are both instrumented; extend to `mark_as_read` following the same pattern.
 - To persist logs to a file, add a `FileHandler` to the logger configuration.
