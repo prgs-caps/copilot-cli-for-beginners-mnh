@@ -56,3 +56,18 @@ def test_list_books_returns_empty_for_new_collection():
     """Deterministic baseline: a fresh collection always starts with zero books."""
     collection = BookCollection()
     assert collection.list_books() == []
+
+def test_add_book_blank_title_raises():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="title"):
+        collection.add_book("", "Some Author", 2000)
+
+def test_add_book_blank_author_raises():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="author"):
+        collection.add_book("Some Title", "  ", 2000)
+
+def test_add_book_invalid_year_raises():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="year"):
+        collection.add_book("Some Title", "Some Author", -1)

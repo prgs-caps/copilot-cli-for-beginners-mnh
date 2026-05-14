@@ -58,7 +58,16 @@ class BookCollection:
 
         Returns:
             The newly created Book instance.
+
+        Raises:
+            ValueError: If title or author is blank, or year is not a positive integer.
         """
+        if not title or not title.strip():
+            raise ValueError("title must not be blank")
+        if not author or not author.strip():
+            raise ValueError("author must not be blank")
+        if not isinstance(year, int) or year <= 0:
+            raise ValueError("year must be a positive integer")
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
         self.save_books()
