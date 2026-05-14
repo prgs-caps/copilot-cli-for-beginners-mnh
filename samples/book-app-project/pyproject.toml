@@ -5,7 +5,7 @@ requires-python = ">=3.10"
 dependencies = ["pytest>=9.0,<10"]
 
 [project.optional-dependencies]
-dev = ["ruff>=0.4,<1", "pytest-cov>=5.0,<6"]
+dev = ["ruff>=0.4,<1", "pytest-cov>=5.0,<8"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=. --cov-report=term-missing"

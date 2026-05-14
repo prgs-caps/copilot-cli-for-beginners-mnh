@@ -10,7 +10,11 @@
 
 | Package | Declared constraint | Installed (verified) | Role |
 |---------|--------------------|-----------------------|------|
-| pytest  | `>=9.0,<10`        | 9.0.3                 | Test runner |
+| pytest     | `>=9.0,<10`   | 9.0.3  | Test runner |
+| pytest-cov | `>=5.0,<8`    | 7.1.0  | Coverage reporting (dev) |
+| ruff       | `>=0.4,<1`    | 0.15.12 | Linter/formatter (dev) |
+
+> **Walk Ex 7 note:** `pytest-cov` constraint was previously declared as `<6` but the installed version (7.1.0) already exceeded it. Updated to `<8` to align declared constraint with installed reality. No functional change — same package, same behavior.
 
 ## Standard-library modules used
 
