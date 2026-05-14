@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: book-app
+Version: 0.1.0
+Requires-Python: >=3.10
+Requires-Dist: pytest<10,>=9.0
+Provides-Extra: dev
+Requires-Dist: ruff<1,>=0.4; extra == "dev"
+Requires-Dist: pytest-cov<8,>=5.0; extra == "dev"
+Requires-Dist: bandit<2,>=1.7; extra == "dev"

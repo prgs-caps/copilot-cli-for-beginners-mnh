@@ -232,3 +232,51 @@ def test_list_books_serialization_shape():
     assert set(d.keys()) == {"title", "author", "year", "read"}, (
         "Serialization schema changed — update contract tests and ai-track-docs/contract-tests.md"
     )
+
+
+# --- Run Ex 3 — backoff param + structured-log refactor tests ---
+
+
+def test_save_with_retry_backoff_param_controls_delay(tmp_path, monkeypatch):
+    """_save_with_retry uses the backoff multiplier, not a hardcoded 2.0.
+
+    With backoff=1.0 (linear), each sleep call should use the same initial_delay.
+    """
+    monkeypatch.setattr(books, "DATA_FILE", str(tmp_path / "data.json"))
+    collection = BookCollection()
+
+    real_open = open
+    call_count = [0]
+    sleep_args: list[float] = []
+
+    def failing_open(*args, **kwargs):
+        mode = args[1] if len(args) > 1 else kwargs.get("mode", "r")
+        if mode == "w":
+            call_count[0] += 1
+            if call_count[0] < 3:
+                raise OSError("transient")
+        return real_open(*args, **kwargs)
+
+    monkeypatch.setattr("builtins.open", failing_open)
+    monkeypatch.setattr("time.sleep", lambda s: sleep_args.append(s))
+
+    collection._save_with_retry(max_attempts=3, initial_delay=0.1, backoff=1.0)
+
+    # With backoff=1.0, every sleep should be exactly initial_delay (0.1)
+    assert sleep_args == [0.1, 0.1], f"Expected linear delays [0.1, 0.1], got {sleep_args}"
+
+
+def test_load_books_corrupt_uses_logger_not_print(tmp_path, monkeypatch, caplog):
+    """Corrupted data file triggers logger.warning (not print) — Run Ex 3 refactor."""
+    import logging
+    bad_file = tmp_path / "bad.json"
+    bad_file.write_text("{not valid json!!}")
+    monkeypatch.setattr(books, "DATA_FILE", str(bad_file))
+
+    with caplog.at_level(logging.WARNING, logger="books"):
+        collection = BookCollection()
+
+    assert collection.list_books() == []
+    assert any("load_books_corrupt" in r.message for r in caplog.records), (
+        "Expected a 'load_books_corrupt' warning log entry"
+    )
