@@ -11,7 +11,7 @@ def titles_match(a: str, b: str) -> bool:
     return a.lower() == b.lower()
 
 
-def print_menu():
+def print_menu() -> None:
     print("\n📚 Book Collection App")
     print("1. Add a book")
     print("2. List books")
@@ -24,7 +24,7 @@ def get_user_choice() -> str:
     return input("Choose an option (1-5): ").strip()
 
 
-def get_book_details():
+def get_book_details() -> tuple[str, str, int]:
     title = input("Enter book title: ").strip()
     author = input("Enter author: ").strip()
 
@@ -38,7 +38,7 @@ def get_book_details():
     return title, author, year
 
 
-def print_books(books):
+def print_books(books: list) -> None:
     if not books:
         print("No books in your collection.")
         return
