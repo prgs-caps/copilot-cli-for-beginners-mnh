@@ -11,11 +11,9 @@ All tests use monkeypatch to isolate the env var so they are order-independent
 and safe to run in any environment.
 """
 
-import pytest
 
 from books import BookCollection
 from utils import titles_match
-
 
 # ---------------------------------------------------------------------------
 # titles_match — unit-level

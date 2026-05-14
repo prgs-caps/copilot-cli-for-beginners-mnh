@@ -15,12 +15,10 @@ to run in any environment without touching disk (tmp_path fixture used for
 the JSON data file to avoid side-effects).
 """
 
-import os
 
 import pytest
 
 from books import BookCollection
-
 
 # ---------------------------------------------------------------------------
 # Helpers

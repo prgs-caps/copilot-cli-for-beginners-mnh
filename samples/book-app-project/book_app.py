@@ -31,7 +31,12 @@ def handle_list():
     elapsed_ms = (time.monotonic() - t0) * 1000
     logger.debug(
         "cmd_list",
-        extra={"op": "handle_list", "status": "ok", "count": len(books), "elapsed_ms": round(elapsed_ms, 3)},
+        extra={
+            "op": "handle_list",
+            "status": "ok",
+            "count": len(books),
+            "elapsed_ms": round(elapsed_ms, 3),
+        },
     )
     show_books(books)
 
@@ -50,7 +55,12 @@ def handle_add():
         elapsed_ms = (time.monotonic() - t0) * 1000
         logger.info(
             "cmd_add",
-            extra={"op": "handle_add", "status": "ok", "title": title, "elapsed_ms": round(elapsed_ms, 3)},
+            extra={
+                "op": "handle_add",
+                "status": "ok",
+                "title": title,
+                "elapsed_ms": round(elapsed_ms, 3),
+            },
         )
         print("\nBook added successfully.\n")
     except ValueError as e:
@@ -113,7 +123,10 @@ def main():
     elif command == "help":
         show_help()
     else:
-        logger.warning("cmd_unknown", extra={"op": "main", "status": "unknown_command", "command": command})
+        logger.warning(
+            "cmd_unknown",
+            extra={"op": "main", "status": "unknown_command", "command": command},
+        )
         print("Unknown command.\n")
         show_help()
 
