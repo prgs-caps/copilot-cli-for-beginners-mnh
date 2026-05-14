@@ -5,10 +5,16 @@ requires-python = ">=3.10"
 dependencies = ["pytest>=9.0,<10"]
 
 [project.optional-dependencies]
-dev = ["ruff>=0.4,<1", "pytest-cov>=5.0,<8"]
+dev = ["ruff>=0.4,<1", "pytest-cov>=5.0,<8", "bandit>=1.7,<2"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=. --cov-report=term-missing"
+
+[tool.bandit]
+# B101 (assert_used): all assert statements in this project live in pytest test files;
+# assert is the standard pytest assertion pattern and carries no production risk.
+skips = ["B101"]
+exclude_dirs = ["tests"]
 
 [tool.ruff]
 target-version = "py310"
