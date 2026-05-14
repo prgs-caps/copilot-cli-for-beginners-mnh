@@ -1,8 +1,12 @@
 import json
+import logging
+import time
 from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 DATA_FILE = "data.json"
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -68,9 +72,15 @@ class BookCollection:
             raise ValueError("author must not be blank")
         if not isinstance(year, int) or year <= 0:
             raise ValueError("year must be a positive integer")
+        t0 = time.monotonic()
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
         self.save_books()
+        elapsed_ms = (time.monotonic() - t0) * 1000
+        logger.debug(
+            "book_added",
+            extra={"op": "add_book", "status": "ok", "title": title, "elapsed_ms": round(elapsed_ms, 3)},
+        )
         return book
 
     def list_books(self) -> List[Book]:
