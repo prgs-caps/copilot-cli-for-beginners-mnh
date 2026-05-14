@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import List, Optional
 
 DATA_FILE = "data.json"
@@ -80,7 +80,12 @@ class BookCollection:
         elapsed_ms = (time.monotonic() - t0) * 1000
         logger.debug(
             "book_added",
-            extra={"op": "add_book", "status": "ok", "title": title, "elapsed_ms": round(elapsed_ms, 3)},
+            extra={
+                "op": "add_book",
+                "status": "ok",
+                "title": title,
+                "elapsed_ms": round(elapsed_ms, 3),
+            },
         )
         return book
 
