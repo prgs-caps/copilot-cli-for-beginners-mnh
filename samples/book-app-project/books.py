@@ -119,12 +119,16 @@ class BookCollection:
         return False
 
     def remove_book(self, title: str) -> bool:
-        """Remove a book by title."""
-        book = self.find_book_by_title(title)
-        if book:
-            self.books.remove(book)
-            self.save_books()
-            return True
+        """Remove a book by title.
+
+        Uses a single-pass enumerate + pop(i) to avoid the double linear scan
+        that find_book_by_title + list.remove would otherwise perform.
+        """
+        for i, book in enumerate(self.books):
+            if titles_match(book.title, title):
+                self.books.pop(i)
+                self.save_books()
+                return True
         return False
 
     def find_by_author(self, author: str) -> List[Book]:
