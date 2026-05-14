@@ -35,13 +35,7 @@ jobs:
           echo "## Test & Coverage Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           if [ -f coverage.json ]; then
-            TOTAL=$(python -c "
-import json, sys
-d = json.load(open('coverage.json'))
-t = d.get('totals', {})
-pct = t.get('percent_covered_display') or str(round(t.get('percent_covered', 0), 1))
-print(pct)
-" 2>/dev/null || echo "n/a")
+            TOTAL=$(python -c 'import json; d=json.load(open("coverage.json")); t=d.get("totals",{}); print(t.get("percent_covered_display") or str(round(t.get("percent_covered",0),1)))' 2>/dev/null || echo "n/a")
             echo "**Coverage: ${TOTAL}%**" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
           fi
