@@ -7,6 +7,7 @@ import pytest
 
 import books
 from books import BookCollection
+from utils import titles_match
 
 
 @pytest.fixture(autouse=True)
@@ -128,3 +129,20 @@ def test_mark_as_read_idempotent():
     assert collection.mark_as_read("Neuromancer") is True
     book = collection.find_book_by_title("Neuromancer")
     assert book.read is True
+
+
+# --- utils.titles_match unit tests (Walk Ex3) ---
+
+
+def test_titles_match_case_insensitive(monkeypatch):
+    """titles_match is case-insensitive when BOOKS_CASE_SENSITIVE is unset."""
+    monkeypatch.delenv("BOOKS_CASE_SENSITIVE", raising=False)
+    assert titles_match("Dune", "dune") is True
+    assert titles_match("DUNE", "Dune") is True
+
+
+def test_titles_match_case_sensitive_flag(monkeypatch):
+    """titles_match is strict when BOOKS_CASE_SENSITIVE=1."""
+    monkeypatch.setenv("BOOKS_CASE_SENSITIVE", "1")
+    assert titles_match("Dune", "dune") is False
+    assert titles_match("Dune", "Dune") is True

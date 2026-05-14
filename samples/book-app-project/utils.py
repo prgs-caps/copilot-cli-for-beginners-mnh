@@ -1,3 +1,16 @@
+import os
+
+
+def titles_match(a: str, b: str) -> bool:
+    """Compare two title strings.
+
+    Case-insensitive by default. Set BOOKS_CASE_SENSITIVE=1 for strict matching.
+    """
+    if os.environ.get("BOOKS_CASE_SENSITIVE", "").strip() == "1":
+        return a == b
+    return a.lower() == b.lower()
+
+
 def print_menu():
     print("\n📚 Book Collection App")
     print("1. Add a book")
