@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import time
 from dataclasses import asdict, dataclass
 from typing import List, Optional
@@ -109,6 +110,9 @@ class BookCollection:
             ValueError: If title or author is blank, or year is not a positive integer.
         """
         self._validate_book_fields(title, author, year)
+        if os.environ.get("BOOK_APP_STRICT_DUPLICATES") == "1":
+            if self.find_book_by_title(title) is not None:
+                raise ValueError(f"duplicate title: {title!r}")
         t0 = time.monotonic()
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
