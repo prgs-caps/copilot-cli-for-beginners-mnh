@@ -59,6 +59,9 @@ samples/book-app-project/data.json
 __pycache__/
 *.pyc
 *.pyo
+.coverage
+htmlcov/
+.pytest_cache/
 
 # .NET
 bin/
